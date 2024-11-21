@@ -1,25 +1,51 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const initialForm = { name: '', breed: '', adopted: false }
 
 // Use this form for both POST and PUT requests!
-export default function DogForm() {
-  const [values, setValues] = useState(initialForm)
-  const onSubmit = (event) => {
+export default function DogForm( {dog, onSubmit}) {
+  const [values, setValues] = useState(dog || initialForm)
+  const [breeds, setBreeds] = useState([])
+  const navigate = useNavigate()
+
+
+      useEffect(() => {
+        // Fetch breeds for dropdown
+        fetch('http://localhost:3003/api/dogs/breeds')
+        .then(res => res.json())
+        .then(data => setBreeds(data.toSorted()))
+        .catch(err => console.error('Error fetching breeds:', err))
+      }, [])
+
+      useEffect(() => {
+          //Update form values when dog prop changes
+          if (dog) {
+            setValues(dog)
+          }
+      }, [dog])
+
+  const handleSubmit = (event) => {
     event.preventDefault()
+    onSubmit(values)
+    setValues(initialForm)
+    navigate('/')
   }
+
   const onChange = (event) => {
     const { name, value, type, checked } = event.target
     setValues({
       ...values, [name]: type === 'checkbox' ? checked : value
     })
   }
+
+ 
   return (
     <div>
       <h2>
-        Create Dog
+        {dog ? 'Update Dog' : 'Create Dog'}
       </h2>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={handleSubmit}>
         <input
           name="name"
           value={values.name}
@@ -35,6 +61,9 @@ export default function DogForm() {
         >
           <option value="">---Select Breed---</option>
           {/* Populate this dropdown using data obtained from the API */}
+          {breeds.map(breed => (
+            <option key={breed} value={breed}>{breed}</option>
+          ))}
         </select>
         <label>
           Adopted: <input
@@ -47,9 +76,13 @@ export default function DogForm() {
         </label>
         <div>
           <button type="submit">
-            Create Dog
+            {dog ? 'Update Dog' : 'Create Dog'}
           </button>
-          <button aria-label="Reset form">Reset</button>
+          <button type="button" onClick={() => setValues(initialForm)}
+            aria-label="Reset form"
+          >
+            Reset
+          </button>
         </div>
       </form>
     </div>

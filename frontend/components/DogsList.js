@@ -1,17 +1,25 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
-export default function DogsList() {
+export default function DogsList({ dogs, onDelete }) {
   return (
     <div>
       <h2>Dogs Shelter</h2>
       <ul>
-        <li>
-          Fido, Bulldog, NOT adopted
+        {dogs.map(dog => (
+            <li key={dog.id}>
+              {dog.name}, {dog.breed}, {dog.adopted ? 'Adopted' : 'NOT adopted'}
+
           <div>
+            <Link to={`/dogs/edit/${dog.id}`} state={{ dog}}>
             <button>Edit</button>
-            <button>Delete</button>
+            </Link>
+            <button onClick={() => onDelete(dog.id)}>Delete</button>
           </div>
-        </li>
+
+            </li>
+        ))}
+                        
       </ul>
     </div>
   )
